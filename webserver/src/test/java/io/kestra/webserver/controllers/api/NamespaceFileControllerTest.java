@@ -135,6 +135,28 @@ class NamespaceFileControllerTest {
     }
 
     @Test
+    void createDirectoryException() {
+    assertThrows(
+        HttpClientResponseException.class,
+        () ->
+            client
+                .toBlocking()
+                .exchange(
+                    HttpRequest.POST(
+                        "/api/v1/namespaces/" + NAMESPACE + "/files/directory?path=/_flows",
+                        null)));
+    assertThrows(
+        HttpClientResponseException.class,
+        () ->
+            client
+                .toBlocking()
+                .exchange(
+                    HttpRequest.POST(
+                        "/api/v1/namespaces/" + NAMESPACE + "/files/directory?path=/_flows2",
+                        null)));
+    }
+
+    @Test
     void createFile() throws IOException {
         MultipartBody body = MultipartBody.builder()
             .addPart("fileContent", "test.txt", "Hello".getBytes())
@@ -155,12 +177,11 @@ class NamespaceFileControllerTest {
             HttpRequest.POST("/api/v1/namespaces/" + NAMESPACE + "/files?path=/_flows", body)
                 .contentType(MediaType.MULTIPART_FORM_DATA_TYPE)
         ));
+        MultipartBody body2 = MultipartBody.builder()
+            .addPart("fileContent", "_flows2", "Hello".getBytes())
+            .build();
         assertThrows(HttpClientResponseException.class, () -> client.toBlocking().exchange(
-            HttpRequest.POST("/api/v1/namespaces/" + NAMESPACE + "/files?path=/_flows2", body)
-                .contentType(MediaType.MULTIPART_FORM_DATA_TYPE)
-        ));
-        assertThrows(HttpClientResponseException.class, () -> client.toBlocking().exchange(
-            HttpRequest.POST("/api/v1/namespaces/" + NAMESPACE + "/files?path=/abc/_flows2/_flows", body)
+            HttpRequest.POST("/api/v1/namespaces/" + NAMESPACE + "/files?path=/_flows2", body2)
                 .contentType(MediaType.MULTIPART_FORM_DATA_TYPE)
         ));
     }
